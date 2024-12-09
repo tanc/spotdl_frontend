@@ -25,10 +25,9 @@ curl -o docker-compose.yml https://raw.githubusercontent.com/tanc/SpotDL-Fronten
 
 2. Edit the docker-compose.yml file to configure your paths:
 ```yaml
-# Customize ports if needed (format is "host:container")
+# Only the frontend port needs to be exposed
 ports:
   - "5173:5173"  # Frontend - change first number to use different host port
-  - "3001:3001"  # Backend - change first number to use different host port
 
 # Configure volume paths
 volumes:
@@ -36,6 +35,8 @@ volumes:
   - /path/to/your/music:/music  # Change this to your music library path
   - ./config:/app/backend/config  # Can keep as is for local config
 ```
+
+Note: The backend runs inside the container and communicates with the frontend internally, so it doesn't need to be exposed to the host machine.
 
 3. Create the necessary directories (if you haven't changed the paths above):
 ```bash
@@ -49,7 +50,6 @@ docker compose up -d
 
 The application will be available at:
 - Frontend: http://localhost:5173 (or your custom port)
-- Backend API: http://localhost:3001 (or your custom port)
 
 #### Environment Variables
 
@@ -68,7 +68,6 @@ mkdir -p downloads config
 # Run the container
 docker run -d \
   -p 5173:5173 \
-  -p 3001:3001 \
   -v $(pwd)/downloads:/downloads \
   -v $(pwd)/config:/app/backend/config \
   -v /path/to/your/music:/music \
@@ -143,5 +142,5 @@ If you encounter permission issues with the mounted volumes:
 
 ### Port Conflicts
 If you see port binding errors:
-1. Check if ports 5173 or 3001 are already in use
+1. Check if ports 5173 is already in use
 2. Modify the port mappings in docker-compose.yml if needed

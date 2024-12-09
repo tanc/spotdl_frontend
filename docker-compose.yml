@@ -7,7 +7,6 @@ services:
         GROUP_ID: ${GROUP_ID:-1000}
     ports:
       - "5173:5173"  # Frontend
-      - "3001:3001"  # Backend
     volumes:
       - ./downloads:/downloads  # Mount downloads directory
       - /home/tanc/mnt/media/music:/music  # Mount music directory

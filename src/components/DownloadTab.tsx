@@ -60,7 +60,7 @@ export default function DownloadTab() {
    */
   const fetchDownloadedFiles = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/files');
+      const response = await fetch('/api/files');
       if (!response.ok) throw new Error('Failed to fetch files');
       const files = await response.json();
       setDownloadedFiles(files);
@@ -76,7 +76,7 @@ export default function DownloadTab() {
    */
   const deleteFile = async (filePath: string) => {
     try {
-      const response = await fetch('http://localhost:3001/api/files', {
+      const response = await fetch('/api/files', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -240,7 +240,7 @@ export default function DownloadTab() {
 
         setStatus(prev => `${prev}\nProcessing: ${currentQuery}`);
 
-        const response = await fetch('http://localhost:3001/api/download', {
+        const response = await fetch('/api/download', {
           method: 'POST',
           body: formData,
         });
@@ -299,7 +299,7 @@ export default function DownloadTab() {
   const moveToMusic = async (path: string) => {
     try {
       setMovingItems(prev => new Set(prev).add(path));
-      const response = await fetch('http://localhost:3001/api/move-to-music', {
+      const response = await fetch('/api/move-to-music', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

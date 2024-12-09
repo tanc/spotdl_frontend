@@ -30,7 +30,8 @@ export default function SettingsTab() {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/config');
+      const response = await fetch('/api/config');
+      if (!response.ok) throw new Error('Failed to fetch config');
       const data = await response.json();
       setConfig(data);
     } catch (error: unknown) {
@@ -44,7 +45,7 @@ export default function SettingsTab() {
 
   const handleSave = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/config', {
+      const response = await fetch('/api/config', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

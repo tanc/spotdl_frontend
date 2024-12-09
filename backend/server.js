@@ -7,7 +7,7 @@ const fs = require('node:fs').promises;
 const os = require('node:os');
 
 const app = express();
-const port = 3001;
+const port = process.env.NODE_ENV === 'production' ? 5173 : 3001;
 const DOWNLOADS_DIR = '/downloads';
 const MUSIC_DIR = '/music';
 
@@ -529,6 +529,18 @@ app.post('/api/move-to-music', async (req, res) => {
   }
 });
 
+// In production, serve static files and handle client-side routing
+if (process.env.NODE_ENV === 'production') {
+  // Serve static files from the dist directory
+  app.use(express.static(path.join(__dirname, '..', 'dist')));
+  
+  // Handle client-side routing
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'dist', 'index.html'));
+  });
+}
+
+// Start the server
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

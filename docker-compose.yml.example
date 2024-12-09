@@ -3,14 +3,12 @@ services:
   spotdl-frontend:
     image: ghcr.io/tanc/spotdl_frontend:latest
     ports:
-      - "5173:5173"  # Frontend
-      - "3001:3001"  # Backend
+      - "5173:5173"  # Frontend only - backend runs on internal network
     volumes:
       - ./downloads:/downloads  # Mount downloads directory
-      - /home/tanc/mnt/media/music:/music  # Mount music directory
+      - /path/to/your/music:/music  # Mount music directory
       - ./config:/app/backend/config  # Mount config directory
     environment:
-      - NODE_ENV=production # Set NODE_ENV to development if needed
-      - VITE_API_URL=http://localhost:3001  # Backend API URL
+      - NODE_ENV=production
       - USER_ID=${USER_ID:-1000}
       - GROUP_ID=${GROUP_ID:-1000}

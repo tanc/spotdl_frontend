@@ -18,35 +18,31 @@ A web-based frontend for SpotDL, allowing you to download Spotify tracks through
 
 ### Using Docker Compose (Recommended)
 
-1. Clone the repository:
+1. Download the docker-compose.yml file:
 ```bash
-git clone <repository-url>
-cd SpotDL-Frontend
+curl -o docker-compose.yml https://raw.githubusercontent.com/tanc/SpotDL-Frontend/main/docker-compose.yml.example
 ```
 
-2. Create and configure your docker-compose.yml:
-   ```bash
-   cp docker-compose.yml.example docker-compose.yml
-   ```
-   Then edit `docker-compose.yml` and modify the settings to match your system:
-   ```yaml
-   # Customize ports if needed (format is "host:container")
-   ports:
-     - "5173:5173"  # Frontend - change first number to use different host port
-     - "3001:3001"  # Backend - change first number to use different host port
-   
-   # Configure volume paths
-   volumes:
-     - ./downloads:/downloads  # Can keep as is for local downloads
-     - /path/to/your/music:/music  # Change this to your music library path
-     - ./config:/app/backend/config  # Can keep as is for local config
-   ```
-   Finally, create the necessary local directories:
-   ```bash
-   mkdir -p downloads config
-   ```
+2. Edit the docker-compose.yml file to configure your paths:
+```yaml
+# Customize ports if needed (format is "host:container")
+ports:
+  - "5173:5173"  # Frontend - change first number to use different host port
+  - "3001:3001"  # Backend - change first number to use different host port
 
-3. Start the container:
+# Configure volume paths
+volumes:
+  - ./downloads:/downloads  # Can keep as is for local downloads
+  - /path/to/your/music:/music  # Change this to your music library path
+  - ./config:/app/backend/config  # Can keep as is for local config
+```
+
+3. Create the necessary directories (if you haven't changed the paths above):
+```bash
+mkdir -p downloads config
+```
+
+4. Start the container:
 ```bash
 docker compose up -d
 ```
@@ -63,8 +59,13 @@ The application will be available at:
 
 ### Using Docker Run
 
+If you prefer using docker run directly:
+
 ```bash
-docker build -t spotdl-frontend .
+# Create necessary directories
+mkdir -p downloads config
+
+# Run the container
 docker run -d \
   -p 5173:5173 \
   -p 3001:3001 \
@@ -74,7 +75,7 @@ docker run -d \
   -e NODE_ENV=production \
   -e USER_ID=$(id -u) \
   -e GROUP_ID=$(id -g) \
-  spotdl-frontend
+  ghcr.io/tanc/spotdl_frontend:latest
 ```
 
 ## Volume Mounts Explained

@@ -12,8 +12,10 @@ services:
       - ./downloads:/downloads  # Mount downloads directory
       - /home/tanc/mnt/media/music:/music  # Mount music directory
       - ./config:/app/backend/config  # Mount config directory
+      - /app/node_modules  # Frontend node_modules volume
+      - /app/backend/node_modules  # Backend node_modules volume
     environment:
-      - NODE_ENV=development # Set NODE_ENV to development if needed
+      - NODE_ENV=production # Set NODE_ENV to development if needed
       - VITE_API_URL=http://localhost:3001  # Backend API URL
       - USER_ID=${USER_ID:-1000}
       - GROUP_ID=${GROUP_ID:-1000}

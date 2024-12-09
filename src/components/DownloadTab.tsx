@@ -46,12 +46,18 @@ export default function DownloadTab() {
     fetchDownloadedFiles();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (statusRef.current) {
       statusRef.current.scrollTop = statusRef.current.scrollHeight;
     }
   }, [status]);
 
+  /**
+   * Fetches the list of downloaded files from the server
+   * Updates the downloadedFiles state with the fetched data
+   * Sets an error message if the fetch fails
+   */
   const fetchDownloadedFiles = async () => {
     try {
       const response = await fetch('http://localhost:3001/api/files');
@@ -64,6 +70,10 @@ export default function DownloadTab() {
     }
   };
 
+  /**
+   * Deletes a file or directory from the server and updates the UI
+   * @param filePath - The absolute path of the file or directory to delete
+   */
   const deleteFile = async (filePath: string) => {
     try {
       const response = await fetch('http://localhost:3001/api/files', {
@@ -106,6 +116,11 @@ export default function DownloadTab() {
     }
   };
 
+  /**
+   * Formats a file size in bytes to a human-readable string
+   * @param bytes - The size in bytes to format
+   * @returns A formatted string with appropriate unit (B, KB, MB, GB)
+   */
   const formatFileSize = (bytes: number): string => {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
@@ -119,6 +134,11 @@ export default function DownloadTab() {
     return `${size.toFixed(1)} ${units[unitIndex]}`;
   };
 
+  /**
+   * Adds the current query to the download queue based on the selected download type
+   * Handles different query formats for various download types (youtube-match, search, etc.)
+   * Clears the input fields after adding to queue
+   */
   const addToQueue = () => {
     let downloadQuery = '';
     
@@ -149,6 +169,12 @@ export default function DownloadTab() {
     setYoutubeMatch({ youtubeUrl: '', spotifyUrl: '' });
   };
 
+  /**
+   * Processes all queued downloads sequentially
+   * Handles different download types, formats, and settings
+   * Updates status and error states during the download process
+   * Refreshes the downloaded files list upon completion
+   */
   const handleDownload = async () => {
     try {
       // Get the downloads to process before clearing the queue
@@ -212,7 +238,7 @@ export default function DownloadTab() {
           formData.append('cookieFile', cookieFileRef.current.files[0]);
         }
 
-        setStatus(prev => prev + `\nProcessing: ${currentQuery}`);
+        setStatus(prev => `${prev}\nProcessing: ${currentQuery}`);
 
         const response = await fetch('http://localhost:3001/api/download', {
           method: 'POST',
@@ -232,16 +258,16 @@ export default function DownloadTab() {
           if (done) break;
           
           const text = new TextDecoder().decode(value);
-          setStatus(prev => prev + '\n' + text);
+          setStatus(prev => `${prev}\n${text}`);
         }
       }
 
-      setStatus(prev => prev + '\nAll downloads complete!');
+      setStatus(prev => `${prev}\nAll downloads complete!`);
       setQuery(''); // Clear the query input
       
       // Refresh the downloaded files list
       await fetchDownloadedFiles();
-      setStatus(prev => prev + '\nDownload successful!');
+      setStatus(prev => `${prev}\nDownload successful!`);
     } catch (error) {
       console.error('Error during download:', error);
       setError('Download failed. Please try again.');
@@ -250,6 +276,10 @@ export default function DownloadTab() {
     }
   };
 
+  /**
+   * Toggles the expanded/collapsed state of a directory in the file list
+   * @param path - The path of the directory to toggle
+   */
   const toggleDirectory = (path: string) => {
     setExpandedDirs(prev => {
       const next = new Set(prev);
@@ -262,6 +292,10 @@ export default function DownloadTab() {
     });
   };
 
+  /**
+   * Moves a file or directory to the music library
+   * @param path - The path of the item to move
+   */
   const moveToMusic = async (path: string) => {
     try {
       setMovingItems(prev => new Set(prev).add(path));
@@ -280,7 +314,7 @@ export default function DownloadTab() {
 
       // Remove the moved item from the list
       setDownloadedFiles(prev => prev.filter(item => !item.path.startsWith(path)));
-      setStatus(prev => prev + `\nMoved ${path} to music library`);
+      setStatus(prev => `${prev}\nMoved ${path} to music library`);
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message);
@@ -296,6 +330,12 @@ export default function DownloadTab() {
     }
   };
 
+  /**
+   * Renders a file or directory item in the file list
+   * @param item - The file or directory item to render
+   * @param depth - The nesting depth of the item (for indentation)
+   * @returns JSX element representing the file or directory
+   */
   const renderFileItem = (item: DownloadedItem, depth: number = 0) => {
     const isExpanded = expandedDirs.has(item.path);
     const isMoving = movingItems.has(item.path);
@@ -305,25 +345,28 @@ export default function DownloadTab() {
       <div key={item.path}>
         <div 
           className={`flex items-center justify-between p-2 ${
-            item.type === 'directory' ? 'bg-gray-100' : 'bg-white'
-          } hover:bg-gray-50 rounded-lg`}
+            item.type === 'directory' 
+              ? 'bg-gray-100 dark:bg-gray-800' 
+              : 'bg-white dark:bg-gray-900'
+          } hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors duration-200`}
           style={{ marginLeft }}
         >
           <div className="flex-1 min-w-0 mr-4">
             <div className="flex items-center">
               {item.type === 'directory' && (
                 <button
+                  type="button"
                   onClick={() => toggleDirectory(item.path)}
-                  className="mr-2 text-gray-500 hover:text-gray-700"
+                  className="mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 >
                   {isExpanded ? '▼' : '▶'}
                 </button>
               )}
               <div>
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {item.name}
                 </p>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {formatFileSize(item.size)} • {new Date(item.modified).toLocaleString()}
                 </p>
               </div>
@@ -332,7 +375,7 @@ export default function DownloadTab() {
           <div className="flex gap-2">
             <Button 
               size="xs"
-              color="gray"
+              color="success"
               onClick={() => moveToMusic(item.path)}
               disabled={isMoving}
             >
@@ -446,13 +489,13 @@ export default function DownloadTab() {
         <Card>
           <h5 className="text-xl font-bold mb-4">Download Queue</h5>
           <div className="space-y-2">
-            {queuedDownloads.map((download, index) => (
-              <div key={index} className="flex items-center justify-between">
+            {queuedDownloads.map((download) => (
+              <div key={`download-${crypto.randomUUID()}`} className="flex items-center justify-between">
                 <span className="text-sm">{download}</span>
                 <Button 
                   size="xs" 
                   color="failure"
-                  onClick={() => setQueuedDownloads(prev => prev.filter((_, i) => i !== index))}
+                  onClick={() => setQueuedDownloads(prev => prev.filter((_, i) => i !== prev.indexOf(download)))}
                 >
                   Remove
                 </Button>
@@ -480,6 +523,7 @@ export default function DownloadTab() {
           <Alert color="info" className="max-h-[400px] overflow-y-auto">
             <pre ref={statusRef} className="whitespace-pre-wrap">{status}</pre>
             <button
+              type="button"
               onClick={() => setStatus('')}
               className="absolute top-2 right-2 inline-flex items-center justify-center w-6 h-6 text-sm font-semibold rounded-lg bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
               aria-label="Clear status"
@@ -495,6 +539,7 @@ export default function DownloadTab() {
           <Alert color="failure">
             {error}
             <button
+              type="button"
               onClick={() => setError('')}
               className="absolute top-2 right-2 inline-flex items-center justify-center w-6 h-6 text-sm font-semibold rounded-lg bg-red-100 text-red-800 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-300"
               aria-label="Clear error"

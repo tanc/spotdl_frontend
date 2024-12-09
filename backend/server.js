@@ -32,10 +32,6 @@ async function loadConfig() {
     if (error.code === 'ENOENT') {
       // Return and save default config if file doesn't exist
       const defaultConfig = {
-        client_id: "",
-        client_secret: "",
-        auth_token: null,
-        user_auth: false,
         audio_providers: ["youtube-music"],
         lyrics_providers: ["genius", "azlyrics", "musixmatch"],
         format: "mp3",
@@ -62,21 +58,27 @@ async function listFilesAndDirs(dir) {
   const result = [];
 
   for (const item of items) {
+    // Skip .gitkeep files
+    if (item.name === '.gitkeep') continue;
+
     const fullPath = path.join(dir, item.name);
     const relativePath = path.relative(DOWNLOADS_DIR, fullPath);
     const stats = await fs.stat(fullPath);
 
     if (item.isDirectory()) {
       const children = await listFilesAndDirs(fullPath);
-      result.push({
-        type: 'directory',
-        path: fullPath,
-        relativePath,
-        name: item.name,
-        size: children.reduce((acc, child) => acc + (child.type === 'file' ? child.size : 0), 0),
-        modified: stats.mtime,
-        children
-      });
+      // Only add directory if it has children or isn't empty (ignoring .gitkeep)
+      if (children.length > 0) {
+        result.push({
+          type: 'directory',
+          path: fullPath,
+          relativePath,
+          name: item.name,
+          size: children.reduce((acc, child) => acc + (child.type === 'file' ? child.size : 0), 0),
+          modified: stats.mtime,
+          children
+        });
+      }
     } else {
       result.push({
         type: 'file',

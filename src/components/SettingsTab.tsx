@@ -2,10 +2,6 @@ import { Button, TextInput, Label, Select, Alert, Card } from 'flowbite-react';
 import { useState, useEffect } from 'react';
 
 interface Config {
-  client_id: string;
-  client_secret: string;
-  auth_token: string | null;
-  user_auth: boolean;
   audio_providers: string[];
   lyrics_providers: string[];
   format: string;
@@ -17,10 +13,6 @@ interface Config {
 
 export default function SettingsTab() {
   const [config, setConfig] = useState<Config>({
-    client_id: '',
-    client_secret: '',
-    auth_token: null,
-    user_auth: false,
     audio_providers: ['youtube-music'],
     lyrics_providers: ['genius', 'azlyrics', 'musixmatch'],
     format: localStorage.getItem('audioFormat') || 'mp3',
@@ -82,46 +74,20 @@ export default function SettingsTab() {
       <div className="space-y-4">
         <div>
           <div className="mb-2 block">
-            <Label htmlFor="client_id" value="Spotify Client ID" />
-          </div>
-          <TextInput
-            id="client_id"
-            value={config.client_id}
-            onChange={(e) => setConfig({...config, client_id: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="client_secret" value="Spotify Client Secret" />
-          </div>
-          <TextInput
-            id="client_secret"
-            type="password"
-            value={config.client_secret}
-            onChange={(e) => setConfig({...config, client_secret: e.target.value})}
-          />
-        </div>
-
-        <div>
-          <div className="mb-2 block">
-            <Label htmlFor="format" value="Output Format" />
+            <Label htmlFor="format" value="Audio Format" />
           </div>
           <Select
             id="format"
             value={config.format}
             onChange={(e) => {
-              const newFormat = e.target.value;
-              setConfig({...config, format: newFormat});
-              localStorage.setItem('audioFormat', newFormat);
+              localStorage.setItem('audioFormat', e.target.value);
+              setConfig({...config, format: e.target.value});
             }}
           >
-            <option value="mp3">MP3 (Best Compatibility)</option>
-            <option value="m4a">M4A (Best for YT Music Premium)</option>
-            <option value="opus">OPUS (Best Quality/Size)</option>
-            <option value="flac">FLAC (Lossless)</option>
-            <option value="ogg">OGG</option>
-            <option value="wav">WAV</option>
+            <option value="mp3">MP3</option>
+            <option value="m4a">M4A</option>
+            <option value="opus">Opus</option>
+            <option value="flac">FLAC</option>
           </Select>
         </div>
 
@@ -176,7 +142,7 @@ export default function SettingsTab() {
             id="threads"
             type="number"
             value={config.threads}
-            onChange={(e) => setConfig({...config, threads: parseInt(e.target.value)})}
+            onChange={(e) => setConfig({...config, threads: Number.parseInt(e.target.value)})}
           />
         </div>
 

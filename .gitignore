@@ -46,3 +46,6 @@ php_errors.log
 .env.local
 .env*
 !.env.example
+
+# Docker
+docker-compose.yml

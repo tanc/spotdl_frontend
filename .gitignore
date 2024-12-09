@@ -1,0 +1,48 @@
+# Ignore IDE files
+.idea/
+.vscode/*
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Ignore .env files as they are personal
+/.env
+
+# Ignore DB dumps
+*.sql
+*.sql.gz
+*.mysql
+*.mysql.gz
+
+# Ignore zip files
+*.zip
+
+# git
+.gitmodules
+bkup.*
+
+# Compiled files
+dist
+build
+
+# OS generated files
+*.swp
+.DS_Store
+.DS_Store?
+._.DS_Store
+._.DS_Store?
+
+# Dependencies
+node_modules
+vendor
+
+#IDE plugins
+.idea
+
+# Errors
+npm-debug.log
+php_errors.log
+
+# env files
+.env.local
+.env*
+!.env.example

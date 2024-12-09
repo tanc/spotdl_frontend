@@ -1,0 +1,18 @@
+{
+  "client_id": "",
+  "client_secret": "",
+  "auth_token": null,
+  "user_auth": false,
+  "audio_providers": [
+    "youtube-music"
+  ],
+  "lyrics_providers": [
+    "genius",
+    "azlyrics",
+    "musixmatch"
+  ],
+  "format": "m4a",
+  "playlist_output": "Various Artists/{list-name}/{list-position}/{title}.{output-ext}",
+  "album_output": "{album-artist}/{album}/{title}.{output-ext}",
+  "threads": 4
+}

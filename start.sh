@@ -11,7 +11,7 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # Start the backend and frontend servers based on NODE_ENV
-if [ "$NODE_ENV" = "production" ]; then
+if [ "$NODE_ENV" != "development" ]; then
     echo "Starting in production mode..."
     # Start the backend server in production mode (which also serves the frontend)
     cd /app/backend && npm run start

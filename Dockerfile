@@ -38,6 +38,10 @@ RUN rm -rf node_modules && npm ci
 WORKDIR /app
 COPY . .
 
+# Update browserslist database and build the frontend for production
+RUN npx browserslist@latest --update-db && \
+    npm run build
+
 # Create mount directories and set permissions
 RUN mkdir -p /downloads /music && \
     chmod -R 777 /downloads /music /opt/venv /app && \

@@ -10,7 +10,4 @@ services:
       - ./config:/app/backend/config  # Mount config directory
     environment:
       - NODE_ENV=production
-      # These values can be set in TrueNAS Scale
-      - USER_ID=${PUID:-1000}  # Set this to match your user's UID
-      - GROUP_ID=${PGID:-1000}  # Set this to match your user's GID
     restart: unless-stopped

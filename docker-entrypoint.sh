@@ -1,22 +1,20 @@
-#!/bin/bash
+#!/bin/sh
 
 # Function to update ownership of specified directories
 update_ownership() {
     user="appuser"
     group="appuser"
     
-    # Update user and group IDs if needed
-    if [ -n "$USER_ID" ] && [ "$USER_ID" != "$(id -u $user)" ]; then
-        usermod -u "$USER_ID" "$user"
-        # Update ownership of container-specific directories
-        chown -R $user:$group /opt/venv /home/$user
-    fi
+    # Default to UID 65532 if USER_ID not provided
+    USER_ID=${USER_ID:-65532}
+    GROUP_ID=${GROUP_ID:-65532}
     
-    if [ -n "$GROUP_ID" ] && [ "$GROUP_ID" != "$(id -g $group)" ]; then
-        groupmod -g "$GROUP_ID" "$group"
-        # Update ownership of container-specific directories
-        chown -R $user:$group /opt/venv /home/$user
-    fi
+    # Always update the UID/GID to match what's requested
+    usermod -u "$USER_ID" "$user"
+    groupmod -g "$GROUP_ID" "$group"
+    
+    # Update ownership of container-specific directories
+    chown -R $user:$group /opt/venv /home/$user
     
     # Ensure the app directory is owned by our user
     # but skip mounted subdirectories
@@ -29,8 +27,8 @@ update_ownership() {
     chown $user:$group /downloads /music
 }
 
-# Update ownership
+# First run the ownership updates as root
 update_ownership
 
-# Execute the main command
-exec "$@"
+# Then switch to appuser and exec the command
+exec su-exec appuser "$@"

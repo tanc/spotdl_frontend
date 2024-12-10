@@ -1,13 +1,12 @@
-# Use Node.js base image
-FROM node:20-slim
+# Use Node.js Alpine base image
+FROM node:20-alpine
 
-# Install Python and pip
-RUN apt-get update && apt-get install -y \
-    python3-full \
-    python3-pip \
-    python3-venv \
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    py3-pip \
     ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+    bash
 
 # Create and activate virtual environment
 ENV VIRTUAL_ENV=/opt/venv
@@ -17,24 +16,6 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install spotdl in virtual environment
 RUN pip install spotdl
 
-# Create app user and group
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-
-# Add group if it doesn't exist
-RUN if ! getent group $GROUP_ID > /dev/null 2>&1; then \
-      groupadd -g $GROUP_ID appuser; \
-    else \
-      groupmod -n appuser $(getent group $GROUP_ID | cut -d: -f1); \
-    fi
-
-# Add user if it doesn't exist
-RUN if ! getent passwd $USER_ID > /dev/null 2>&1; then \
-      useradd -u $USER_ID -g appuser -m -s /bin/bash appuser; \
-    else \
-      usermod -l appuser -g appuser -d /home/appuser -m $(getent passwd $USER_ID | cut -d: -f1); \
-    fi
-
 # Set working directory
 WORKDIR /app
 
@@ -43,37 +24,20 @@ COPY package*.json ./
 COPY backend/package*.json ./backend/
 
 # Install frontend dependencies
-RUN npm install
+RUN npm ci
 
 # Install backend dependencies
 WORKDIR /app/backend
-RUN rm -rf node_modules && npm install
-
-# Return to app directory
-WORKDIR /app
+RUN rm -rf node_modules && npm ci
 
 # Copy the rest of the application
+WORKDIR /app
 COPY . .
 
-# Copy and set permissions for start script
-COPY start.sh .
-RUN chmod +x start.sh
-
-# Create directories and set permissions
+# Create mount directories and set permissions
 RUN mkdir -p /downloads /music && \
-    chown -R appuser:appuser /app /downloads /music /opt/venv && \
-    chmod -R 755 /app
+    chmod -R 777 /downloads /music /opt/venv /app && \
+    chmod +x start.sh
 
-# Copy and set up entrypoint script
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
-
-# Switch to app user
-USER appuser
-
-# Build the frontend
-RUN npm run build
-
-# Use entrypoint script to handle permissions
-ENTRYPOINT ["/docker-entrypoint.sh"]
+# Default command
 CMD ["./start.sh"]

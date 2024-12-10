@@ -13,12 +13,11 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-# Create cache directory and set environment variable
-ENV XDG_CACHE_HOME=/cache
-RUN mkdir -p /cache && chmod 777 /cache
-
 # Install spotdl in virtual environment
 RUN pip install spotdl
+
+# Create the .spotdl directory
+RUN mkdir -p /.spotdl && chmod 777 /.spotdl
 
 # Set working directory
 WORKDIR /app

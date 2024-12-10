@@ -64,11 +64,16 @@ RUN mkdir -p /downloads /music && \
     chown -R appuser:appuser /app /downloads /music /opt/venv && \
     chmod -R 755 /app
 
+# Copy and set up entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Switch to app user
 USER appuser
 
 # Build the frontend
 RUN npm run build
 
-# Start both servers using a shell script
+# Use entrypoint script to handle permissions
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["./start.sh"]

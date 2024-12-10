@@ -270,6 +270,39 @@ ${audioFiles.map(file => file).join('\n')}`;
   }
 }
 
+// Track all errors
+let downloadErrors = new Map();
+
+// Helper function to check if we should abort due to repeated errors
+function shouldAbortDownload(error) {
+  const errorKey = error.message.trim();
+  const now = Date.now();
+  const errors = downloadErrors.get(errorKey) || [];
+  
+  // Remove errors older than 30 seconds
+  const recentErrors = errors.filter(time => (now - time) < 30000);
+  
+  // Add current error
+  recentErrors.push(now);
+  downloadErrors.set(errorKey, recentErrors);
+  
+  // Abort if we have 3 or more recent errors of the same type
+  return recentErrors.length >= 3;
+}
+
+// Clean up old errors periodically (every 30 seconds)
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, times] of downloadErrors.entries()) {
+    const recentErrors = times.filter(time => (now - time) < 30000);
+    if (recentErrors.length === 0) {
+      downloadErrors.delete(key);
+    } else {
+      downloadErrors.set(key, recentErrors);
+    }
+  }
+}, 30000);
+
 // Routes
 app.get('/api/config', async (req, res) => {
   const config = await loadConfig();
@@ -383,8 +416,19 @@ app.post('/api/download', upload.single('cookieFile'), async (req, res) => {
     });
 
     spotdl.stderr.on('data', (data) => {
-      console.error('spotdl error:', data.toString());
-      res.write(data.toString());
+      const errorMsg = data.toString().trim();
+      console.error('spotdl error:', errorMsg);
+      
+      // Check for repeated errors
+      if (shouldAbortDownload(new Error(errorMsg))) {
+        console.error('Aborting download due to repeated errors:', errorMsg);
+        spotdl.kill();
+        res.write(`\nDownload aborted: Too many repeated errors encountered. Last error: ${errorMsg}\n`);
+        res.end();
+        return;
+      }
+      
+      res.write(`${errorMsg}\n`);
     });
     
     spotdl.on('close', async (code) => {

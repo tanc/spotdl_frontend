@@ -491,7 +491,7 @@ export default function DownloadTab() {
           <div className="space-y-2">
             {queuedDownloads.map((download) => (
               <div key={`download-${crypto.randomUUID()}`} className="flex items-center justify-between">
-                <span className="text-sm">{download}</span>
+                <span className="text-sm dark:text-white">{download}</span>
                 <Button 
                   size="xs" 
                   color="failure"
